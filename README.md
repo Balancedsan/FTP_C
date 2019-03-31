@@ -46,7 +46,7 @@ The client is also able to connect using the ipaddress and ports by specifying t
 $./myftp <ip add> <port num>
 ```
 
-##Authors
+## Authors
 John Wee
 
 
