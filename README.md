@@ -1,5 +1,12 @@
 # Project Title
-A FTP Client and Server Program Done In C programming
+A FTP Client and Server Program Done In C programming includes list of commands 
+
+PWD - print working directory
+cd - change directory
+PUT - put a file onto the server
+GET - Get a file from the server
+ldir - displays files name in current directory
+lpwd - displays current directory of the client
 
 ## Preresquites
 Any Unix Machine with shell prompt 
@@ -16,8 +23,21 @@ To install makefile on linux
 $ sudo apt install make
 ```
 
+
 ## Getting Started
 Clone or install the repo onto your local machine
+
+compile the program using the command make clean and then make in both folders before running the program
+
+Example in myftp folder
+
+```
+$ make clean
+```
+
+```
+$ make 
+```
 
 To run the server and client program on your local machine , run two terminals and go into the client directory myftp and server directory myftpd to run the executable.
 
