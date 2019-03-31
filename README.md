@@ -19,7 +19,7 @@ $ sudo apt install make
 ## Getting Started
 Clone or install the repo onto your local machine
 
-To run the server and client program on your local machine , run two terminals and go into the client directory mtftp and server directory myftpd to run the executable.
+To run the server and client program on your local machine , run two terminals and go into the client directory myftp and server directory myftpd to run the executable.
 
 The server program creates a daemon process , please ensure you kill the process after running the server or the program will continue to run on your machine
 
