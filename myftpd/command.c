@@ -46,7 +46,7 @@ void commandPUT(descriptors * desc){
     if((fileDescriptor= open(filename,O_RDONLY)) != -1){
         logger(desc,"File already exist : %s",filename);
         acknowledgeCode = ACK_PUT_FILENAME;
-    }else if((fileDescriptor = open(filename,O_WRONLY | O_CREAT, 0777))){
+    }else if((fileDescriptor = open(filename,O_WRONLY | O_CREAT, 0777)) == -1){
         logger(desc,"Cannot create file ",filename);
         acknowledgeCode = ACK_PUT_CREATEFILE;
     }
@@ -93,34 +93,33 @@ void commandPUT(descriptors * desc){
     
     
     int blockSize = FILE_BLOCK_SIZE;
-    
-    // if the MAX fileblocksize constant is bigger than the file size set the block size to be block size to be the filesize
-    
-    
     if(FILE_BLOCK_SIZE > fileSize){
         blockSize = fileSize;
     }
     
     // creates a file buffer of block size
     char fileBuffer[blockSize];
-    int bytesWritten = 0 , bytesRead = 0;
+    int bytesRead = 0 , byteswritten = 0;
     
     // iterate through the filesize and to read and write file
     while(fileSize > 0){
         if(blockSize > fileSize){
             blockSize = fileSize;
         }
+        
         if((bytesRead = readNBytes(desc->sd,fileBuffer,blockSize)) == -1){
             logger(desc,"[-] Failed to read bytes.");
             close(fileDescriptor);
             return;
         }
-        if((bytesWritten = write(fileDescriptor,fileBuffer,bytesRead)) < bytesRead){
-            logger(desc,"[-] Failed to write %d bytes, wrote %d bytes instead.",bytesRead,bytesWritten);
+        
+        if((byteswritten = write(fileDescriptor,fileBuffer,bytesRead)) < bytesRead){
+            logger(desc,"[-] Failed to write %d bytes, wrote %d bytes instead.",bytesRead,byteswritten);
             close(fileDescriptor);
             acknowledgeCode = ACK_PUT_WRERROR;
         }
-        fileSize -= bytesWritten;
+        
+        fileSize -= byteswritten;
     }
     
     // close file descriptor

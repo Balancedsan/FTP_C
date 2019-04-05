@@ -13,21 +13,34 @@
 #include <fcntl.h>     //open, O_RONLY, O_WRONLY
 #include <errno.h>     //errno
 
+command* allocCommand(int sd , char * arg) {
+    command* cmd = malloc(sizeof(command));
+    cmd->sd = sd;
+    cmd->arg = arg;
+    return cmd;
+}
+
+void freeCommand(command* cmd) {
+    if (cmd != NULL) {
+        free(cmd);
+        cmd = NULL;
+    }
+}
 
 // this function uses the myftp protocol to send a file from client to the server
 
-void putCommand(int sd, char * filename){
+void putCommand(command* cmd){
     int fileDescriptor;
     struct stat inf;
     int fileSize;
-    int filenameLength = strlen(filename);
+    int filenameLength = strlen(cmd->arg);
     
     char opcode;
     char ackcode;
     
     // processes the file before initializing put protocol
-    if((fileDescriptor = open(filename,O_RDONLY)) == -1){
-        printf("unable to open file %s\n",filename);
+    if((fileDescriptor = open(cmd->arg,O_RDONLY)) == -1){
+        printf("unable to open file %s\n",cmd->arg);
         return;
     }
     
@@ -50,26 +63,26 @@ void putCommand(int sd, char * filename){
     
     // sends put command
     
-    if(writeByte(sd,OP_PUT) == -1){
+    if(writeByte(cmd->sd,OP_PUT) == -1){
         printf("unable to send PUT \n");
         return;
     }
 
     // sends filenamelength
-    if(writeTwoByteLength(sd,filenameLength) == -1){
+    if(writeTwoByteLength(cmd->sd,filenameLength) == -1){
         printf("unable to send length of file name.\n");
         return;
     }
     
     // sends the filename
-    if(writeNBytes(sd,filename,filenameLength) <= 0){
+    if(writeNBytes(cmd->sd,cmd->arg,filenameLength) <= 0){
         printf("unable to send file name\n");
         return;
     }
     
     // waits for a response
     
-    if(readByte(sd,&opcode) == -1){
+    if(readByte(cmd->sd,&opcode) == -1){
         printf("unable to read opcode \n");
         return;
     }
@@ -79,7 +92,7 @@ void putCommand(int sd, char * filename){
         return;
     }
     
-    if(readByte(sd,&ackcode) == -1){
+    if(readByte(cmd->sd,&ackcode) == -1){
         printf("unable to read acknoledgement code \n");
         return;
     }
@@ -103,12 +116,12 @@ void putCommand(int sd, char * filename){
     
     // sends the data
     
-    if(writeByte(sd,OP_DATA) == -1){
+    if(writeByte(cmd->sd,OP_DATA) == -1){
         printf("unable to send data \n");
         return;
     }
     
-    if(writeFourByteLength(sd,fileSize) == -1){
+    if(writeFourByteLength(cmd->sd,fileSize) == -1){
         printf("unable to send file size \n");
         return;
     }
@@ -117,7 +130,7 @@ void putCommand(int sd, char * filename){
     char buf[FILE_BLOCK_SIZE];
     
     while((bytesRead = read(fileDescriptor,buf,bytesRead)) == -1){
-        if((bytesWritten = writeNBytes(sd,buf,bytesRead)) == -1){
+        if((bytesWritten = writeNBytes(cmd->sd,buf,bytesRead)) == -1){
             printf("unable to send file contents");
             return;
         }
@@ -127,7 +140,7 @@ void putCommand(int sd, char * filename){
     }
     
     // waits for response
-    if(readByte(sd,&opcode) == -1){
+    if(readByte(cmd->sd,&opcode) == -1){
         printf("failed to read opcode \n");
         return;
     }
@@ -137,13 +150,13 @@ void putCommand(int sd, char * filename){
         return;
     }
     
-    if(readByte(sd,&ackcode) == -1){
+    if(readByte(cmd->sd,&ackcode) == -1){
         printf("failed to read ackcode \n");
         return;
     }
     
     if(ackcode == ACK_PUT_SUCCESS){
-        printf("done file %s has been sent to the server (%d bytes)\n",filename,sum);
+        printf("done file %s has been sent to the server (%d bytes)\n",cmd->arg,sum);
     }else {
         printf("%s\n",ACK_PUT_WRERROR_MSG);
     }
@@ -151,47 +164,47 @@ void putCommand(int sd, char * filename){
 
 // this function uses myftp protocol to download a file from the server to client
 
-void getCommand(int sd, char * filename){
+void getCommand(command* cmd){
     
     
-    int filenameLength = strlen(filename);
+    int filenameLength = strlen(cmd->arg);
     char ackcode;
     char opcode;
     int fileDescriptor;
     
     
-    if((fileDescriptor = open(filename,O_RDONLY)) != -1){
-        printf("file already exists %s\n",filename);
+    if((fileDescriptor = open(cmd->arg,O_RDONLY)) != -1){
+        printf("file already exists %s\n",cmd->arg);
         return;
-    }else if((fileDescriptor = open(filename,O_WRONLY | O_CREAT , 0777)) == -1){
-        printf("unable to create file %s\n",filename);
+    }else if((fileDescriptor = open(cmd->arg,O_WRONLY | O_CREAT , 0777)) == -1){
+        printf("unable to create file %s\n",cmd->arg);
         return;
     }
     
     // send get
-    if(writeByte(sd,OP_GET) == -1){
+    if(writeByte(cmd->sd,OP_GET) == -1){
         printf("unable to send GET\n");
         return;
     }
     // send filelength
-    if(writeTwoByteLength(sd,filenameLength) == -1){
+    if(writeTwoByteLength(cmd->sd,filenameLength) == -1){
         printf("unable to send length of file name \n ");
         return;
     }
     // send the file name
-    if(writeNBytes(sd,filename,filenameLength) <= 0){
+    if(writeNBytes(cmd->sd,cmd->arg,filenameLength) <= 0){
         printf("unable to send file name\n");
         return;
     }
     
-    if(readByte(sd,&opcode) == -1){
+    if(readByte(cmd->sd,&opcode) == -1){
         printf("unable to read opcode \n");
         return;
     }
     
     // error code being sent
     if(opcode == OP_GET){
-        if(readByte(sd,&ackcode) == -1){
+        if(readByte(cmd->sd,&ackcode) == -1){
             printf("unable to read acknowledgement code");
             return;
         }
@@ -207,7 +220,7 @@ void getCommand(int sd, char * filename){
             break;
         }
         close(fileDescriptor);
-        unlink(filename);
+        unlink(cmd->arg);
         return;
     }
     
@@ -217,7 +230,7 @@ void getCommand(int sd, char * filename){
     
     
     // read fileSize
-    if(readFourByteLength(sd,&fileSize) == -1){
+    if(readFourByteLength(cmd->sd,&fileSize) == -1){
         printf("unable to read file size \n");
         return;
     }
@@ -234,7 +247,7 @@ void getCommand(int sd, char * filename){
         if(blockSize > fileSize){
             blockSize = fileSize;
         }
-        if((bytesRead = readNBytes(sd,filebuffer,blockSize)) == -1){
+        if((bytesRead = readNBytes(cmd->sd,filebuffer,blockSize)) == -1){
             printf("unable to read file \n");
             close(fileDescriptor);
             return;
@@ -248,7 +261,7 @@ void getCommand(int sd, char * filename){
         sum+= bytesRead;
     }
     close(fileDescriptor);
-    printf("Done: File %s has been recieved from the server %d bytes \n",filename,sum);
+    printf("Done: File %s has been recieved from the server %d bytes \n",cmd->arg,sum);
 
     
 }
@@ -256,7 +269,7 @@ void getCommand(int sd, char * filename){
 void pwdCommand(int sd){
     char opcode;
     int fileSize;
-    
+
     
     if(writeByte(sd,OP_PWD) == -1){
         printf("unable to send pwd \n");
@@ -370,29 +383,29 @@ void ldirCommand(){
 // this function changes the current directory of the server that is serving the client
 
 
-void cdCommand(int sd, char * token){
+void cdCommand(command* cmd){
     char opcode;
     char ackcode;
-    int length = strlen(token);
+    int length = strlen(cmd->arg);
     
     // unable to send change directory
     
-    if(writeByte(sd,OP_CD) == -1){
+    if(writeByte(cmd->sd,OP_CD) == -1){
         printf("unable to send cd \n");
         return;
     }
     // unable to write length of file
-    if(writeTwoByteLength(sd,length) == -1){
+    if(writeTwoByteLength(cmd->sd,length) == -1){
         printf("unable to write length \n");
         return;
     }
     
-    if(writeNBytes(sd,token,strlen(token)) == -1){
+    if(writeNBytes(cmd->sd,cmd->arg,strlen(cmd->arg)) == -1){
         printf("unable to write to directory name \n");
         return;
     }
     
-    if(readByte(sd,&opcode) == -1){
+    if(readByte(cmd->sd,&opcode) == -1){
         printf("unable to read opcode \n");
         return;
     }
@@ -402,7 +415,7 @@ void cdCommand(int sd, char * token){
         return;
     }
     
-    if(readByte(sd,&ackcode) == -1){
+    if(readByte(cmd->sd,&ackcode) == -1){
         printf("unable to read acknowledgement code \n");
         return;
     }

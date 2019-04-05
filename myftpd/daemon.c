@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 
 void serveClient(descriptors *desc , char * address, int port){
@@ -22,6 +23,9 @@ void serveClient(descriptors *desc , char * address, int port){
             case OP_PWD:
                 commandPWD(desc);
                 break;
+            case OP_GET:
+                commandGET(desc);
+                break;
             case OP_DIR:
                 commandDIR(desc);
                 break;
@@ -34,8 +38,8 @@ void serveClient(descriptors *desc , char * address, int port){
             default:
                 logger(desc,"invalid opcode received"); // invalid disregard
                 break;
-        }
-    }
+        }// end switch
+    } // end while
     
     logger(desc,"disconnected");
     return;

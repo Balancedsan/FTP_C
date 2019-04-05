@@ -15,6 +15,9 @@ int cid; // the client id
 char logfile[256]; // absolute log path of the file being 256 bytes in length
 } descriptors;
 
+
+void getLocalTime(char * timeFormat);
+
 /**
 * accepts a client id, formated output string and variable list of arguments
 * returns: current time, client id and passwed format string to log file

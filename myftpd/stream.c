@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+
 // iterates through nbytes until entire n bytes is written from the buffer and returns the number of bytes written
 int writeNBytes(int sd, char * buf, int nbytes){
     
@@ -81,7 +82,7 @@ int writeTwoByteLength(int sd, int length){
 // reads a two byte integer from the socket
         
 int readTwoByteLength(int sd, int * length){
-    // short stores exactly 2 bytes size
+    // short stores exactly 2 bytes size/Users/apple/Desktop/graceA/myftpd/stream.c
     short data = 0;
     
     if(read(sd,&data,2) != 2){

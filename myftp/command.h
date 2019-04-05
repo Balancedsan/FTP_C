@@ -16,12 +16,12 @@
 
 // opcodes
 
-#define OP_PWD 'W'
-#define OP_DIR 'I'
+#define OP_PWD 'P'
+#define OP_DIR 'D'
 #define OP_CD 'C'
 #define OP_GET 'G'
-#define OP_PUT 'P'
-#define OP_DATA 'D'
+#define OP_PUT 'U'
+#define OP_DATA 'A'
 #define OP_ONLINE 'O'
 
 
@@ -54,12 +54,20 @@
 // other error messages
 #define UNEXPECTED_ERROR_MSG "unexpected behaviour"
 
+typedef struct {
+    int sd;
+    char *arg;
+} command;
+
+command* allocCommand(int sd , char * arg);
+void freeCommand(command* cmd);
+
 /**
  * uses myfrp protocol to send a file from client to server
  * sd - client socket
  * filename - name of file to be sent from client to server
  */
-void putCommand(int sd , char * filename);
+void putCommand(command* cmd);
 
 
 /**
@@ -67,7 +75,7 @@ void putCommand(int sd , char * filename);
  * sd client's socket
  * filename - name of file to be sent from server to client
  */
-void getCommand(int sd , char * filename);
+void getCommand(command* cmd);
 
 
 /**
@@ -98,7 +106,7 @@ void ldirCommand();
  * uses the myftp protocol to change directory of the server
  * token - path
  */
-void cdCommand(int sd, char* token);
+void cdCommand(command* cmd);
 
 
 /**

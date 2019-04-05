@@ -8,12 +8,12 @@
 #define FILE_BLOCK_SIZE 512
 
 // operation code constants
-#define OP_PWD 'W'
-#define OP_DIR 'I'
+#define OP_PWD 'P'
+#define OP_DIR 'D'
 #define OP_CD 'C'
-#define OP_DATA 'D'
+#define OP_DATA 'A'
 #define OP_GET 'G'
-#define OP_PUT 'P'
+#define OP_PUT 'U'
 #define OP_ONLINE 'O'
 
 // acknowledge code for operation change directory (OP_CD)
@@ -25,7 +25,7 @@
 #define ACK_GET_OTHER '1'
 
 // error message for operation 'GET' acknowledge codes (OP_GET)
-#define ACK_GET_FIND_MSG "The sever cannot find the requested file"
+#define ACK_GET_FIND_MSG "The server cannot find the requested file"
 #define ACK_GET_OTHER_MSG "The server is unable to request the file due to other reasons"
 
 // acknowledge code for operation 'PUT' OP_PUT

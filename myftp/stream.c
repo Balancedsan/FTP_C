@@ -18,7 +18,7 @@ int writeNBytes(int sd, char * buf, int nbytes){
     
     for(totalWritten = 0; totalWritten < nbytes; totalWritten += bytesWritten){
         // write to file for each byte and if any write failed return -1
-        if((bytesWritten = write(sd,buf+bytesWritten, nbytes -totalWritten)) <= 0){
+        if((bytesWritten = write(sd,buf+bytesWritten, nbytes -totalWritten)) < 0){
             return (bytesWritten);
         }
     }
@@ -32,7 +32,7 @@ int readNBytes(int sd, char* buf, int nbytes){
     int totalRead = 0;
     
     for(totalRead = 0; (totalRead < nbytes) && (bytesRead > 0); totalRead += bytesRead){
-        if((bytesRead = read(sd,buf + totalRead,nbytes - totalRead) < 0)){
+        if((bytesRead = read(sd,buf + totalRead,nbytes - totalRead)) < 0){
             return (bytesRead);
         }
     }

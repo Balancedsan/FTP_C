@@ -1,86 +1,54 @@
-Sat Mar 30 14:29:06 2019
-server initialized.
-Sat Mar 30 14:29:06 2019
-initial dir set to &s
-Sat Mar 30 14:29:06 2019
-myftp server now listening on port 40312
-Sat Mar 30 19:25:02 2019
-server initialized.
-Sat Mar 30 19:25:02 2019
-initial dir set to &s
-Sat Mar 30 19:25:02 2019
-myftp server now listening on port 40312
-Sat Mar 30 19:25:06 2019
-Client 1 - Connection accepted from 127.0.0.1:57467
-Sat Mar 30 19:25:17 2019
+Fri Apr  5 16:27:21 2019
+ server initialized.
+Fri Apr  5 16:27:21 2019
+ initial dir set to &s
+Fri Apr  5 16:29:01 2019
+ server initialized.
+Fri Apr  5 16:29:01 2019
+ initial dir set to &s
+Fri Apr  5 16:29:22 2019
+ server initialized.
+Fri Apr  5 16:29:22 2019
+ initial dir set to &s
+Fri Apr  5 16:30:11 2019
+ server initialized.
+Fri Apr  5 16:30:11 2019
+ initial dir set to &s
+Fri Apr  5 16:31:15 2019
+ server initialized.
+Fri Apr  5 16:31:15 2019
+ initial dir set to &s
+Fri Apr  5 16:32:03 2019
+ server initialized.
+Fri Apr  5 16:32:03 2019
+ initial dir set to &s
+Fri Apr  5 16:33:47 2019
+ server initialized.
+Fri Apr  5 16:33:47 2019
+ initial dir set to &s
+Fri Apr  5 21:14:21 2019
+ server initialized.
+Fri Apr  5 21:14:21 2019
+ initial dir set to &s
+Fri Apr  5 21:14:21 2019
+ myftp server now listening on port 40300
+Fri Apr  5 21:18:57 2019
+ server initialized.
+Fri Apr  5 21:18:57 2019
+ initial dir set to &s
+Fri Apr  5 21:18:57 2019
+ myftp server now listening on port 40300
+Fri Apr  5 21:19:04 2019
+Client 1 - Connection accepted from 127.0.0.1:51176
+Fri Apr  5 21:19:07 2019
 Client 1 - PWD
-Sat Mar 30 19:25:17 2019
+Fri Apr  5 21:19:07 2019
 Client 1 - PWD completed
-Sat Mar 30 19:25:20 2019
-Client 1 - DIR
-Sat Mar 30 19:25:20 2019
-Client 1 - DIR success.
-Sat Mar 30 19:25:20 2019
-Client 1 - DIR complete
-Sat Mar 30 19:25:22 2019
+Fri Apr  5 21:19:10 2019
+Client 1 - CD
+Fri Apr  5 21:19:10 2019
+Client 1 - CD ..
+Fri Apr  5 21:19:10 2019
+Client 1 - cd complete
+Fri Apr  5 21:19:13 2019
 Client 1 - disconnected
-Sun Mar 31 22:10:16 2019
-server initialized.
-Sun Mar 31 22:10:16 2019
-initial dir set to &s
-Sun Mar 31 22:10:16 2019
-myftp server now listening on port 40300
-Sun Mar 31 22:11:42 2019
-server initialized.
-Sun Mar 31 22:11:42 2019
-initial dir set to &s
-Sun Mar 31 22:11:42 2019
-myftp server now listening on port 40300
-Sun Mar 31 22:11:50 2019
-Client 1 - Connection accepted from 127.0.0.1:56611
-Sun Mar 31 22:12:04 2019
-Client 1 - invalid opcode received
-Sun Mar 31 22:12:40 2019
-Client 2 - Connection accepted from 127.0.0.1:56624
-Sun Mar 31 22:12:42 2019
-Client 2 - invalid opcode received
-Sun Mar 31 22:12:58 2019
-Client 3 - Connection accepted from 127.0.0.1:56629
-Sun Mar 31 22:13:04 2019
-Client 3 - DIR
-Sun Mar 31 22:13:04 2019
-Client 3 - DIR success.
-Sun Mar 31 22:13:04 2019
-Client 3 - DIR complete
-Sun Mar 31 22:13:08 2019
-Client 3 - invalid opcode received
-Sun Mar 31 22:19:50 2019
-Client 1 - disconnected
-Sun Mar 31 22:23:59 2019
-server initialized.
-Sun Mar 31 22:23:59 2019
-initial dir set to &s
-Sun Mar 31 22:24:28 2019
-server initialized.
-Sun Mar 31 22:24:28 2019
-initial dir set to &s
-Sun Mar 31 22:25:27 2019
-server initialized.
-Sun Mar 31 22:25:27 2019
-initial dir set to &s
-Sun Mar 31 22:25:42 2019
-server initialized.
-Sun Mar 31 22:25:42 2019
-initial dir set to &s
-Sun Mar 31 22:28:37 2019
-server initialized.
-Sun Mar 31 22:28:37 2019
-initial dir set to &s
-Sun Mar 31 22:35:14 2019
-server initialized.
-Sun Mar 31 22:35:14 2019
-initial dir set to &s
-Sun Mar 31 22:54:10 2019
-server initialized.
-Sun Mar 31 22:54:10 2019
-initial dir set to &s

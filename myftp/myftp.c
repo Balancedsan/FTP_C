@@ -19,45 +19,49 @@
 #include <errno.h>     //errno
 #include <signal.h>    //sigfillset, sigaction, sigint, sigquit
 
-/*
- * Connects to server based on the arguments (0 to 2) received.
- * Arguments numbers and their descriptions:
- * 0) Default hostname and port. Port number: 40300
- * 1) User supplies hostname, uses default port. (eg ./myftpd hostname)
- * 2) User supplies hostname and port. (eg /myftpd hostname port)
+// macro function that checks the signal
+
+#define CHECK_SIGNAL(signal, obj) \
+    if(sigaction(signal, obj , NULL) != 0) { \
+    printf("[-] sigaction of "#signal" has terminated the client \n"); \
+    exit(1); \
+    }
+
+int execute(int socketdesc, char *buf); // function prototype to execute the client
+
+void createInterruptSignal();// function prototype to create an interrupt signal for the program
+
+/**
+ * Connects to the server by the number of argument it receives (0 - 2)
+ * if 0 arguments
+ *      Default hostname and port is used (port 40300)
+ * else if 1 arguments
+ *      the program uses the hostname the user has provided as a argument for example (eg ./myftp <hostname>)
+ * else if 2 arguments
+ *      the program uses the hostname and port the user has provided as a argument (eg /myftpd hostname port)
+ *
  */
 int main(int argc , char * argv[]){
-    struct sigaction interrupt; // initialze sigaction
-    interrupt.sa_flags = 0;
-    interrupt.sa_handler = quitCommand; // set the handler to capture signals
-    sigfillset(&(interrupt.sa_mask)); // block all other signals
     
-    if(sigaction(SIGINT, &interrupt , NULL) != 0){ //capture terminate signals
-        printf("sigaction of SIGINT has terminated the client");
-        exit(1);
-    }
-    
-    if(sigaction(SIGQUIT,&interrupt , NULL ) != 0){ // capture quit signals
-        printf("sigaction on SIGQUIT has terminated the client");
-        exit(1);
-    }
-    
+    createInterruptSignal(); // creates the interrupt signal for the program to handle interrupts
+
     int socketdesc; // socket descriptor used to store the descriptor of the socket to be used later
     char buf[MAX_CMD_INPUT], host[64]; // buffer to store maximum command input whereas host stores the ip addr
     char port[6];
     snprintf(port, 6, "%d", SERV_TCP_PORT);
-    
-    
+
+
+
     // check if the user entered more arguments than the expected arguments
     if(argc > 3 || argc < 1)
     {
-        printf("[-] Usage: %s [ <server host name> [ <server listening port> ] ]\n", argv[0]);
+        printf("[-] Example Usage: %s  <server host name>  <server listening port> \n", argv[0]);
         exit(1);
     }
     // initialize the socket for the program
     if((socketdesc = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        perror("initializing the socket hascaused the error");
+        printf("[-] initializing the socket has caused an error");
         exit(1);
     }
     
@@ -148,7 +152,7 @@ int main(int argc , char * argv[]){
         }
         
         int status;
-        struct addrinfo hints, *servinfo; // used to provite hints
+        struct addrinfo hints, *servinfo; // used to provide hints
         memset(&hints, 0, sizeof(hints));
         hints.ai_family = AF_UNSPEC;
         hints.ai_socktype = SOCK_STREAM;
@@ -161,7 +165,7 @@ int main(int argc , char * argv[]){
         
         if(connect(socketdesc, servinfo->ai_addr, servinfo->ai_addrlen) < 0)
         {
-            printf("[-] Error in connection: %s\n", strerror(errno));
+            printf("[-] Error in the connection: %s\n", strerror(errno));
             exit(1);
         }
         else
@@ -169,40 +173,47 @@ int main(int argc , char * argv[]){
             printf("Connected to myftp on host: %s\n", host);
         }
     }
-    
+
+    return execute(socketdesc, buf);
+
+}
+
+/**
+ * executes the client program and checks for the type of command the user has inputted
+ *
+ **/
+int execute(int socketdesc, char *buf) {
     char *tokens[2], *delim;
-    
+
     while (1)
     {
         if(writeByte(socketdesc, OP_ONLINE) == -1) // make sure that the server is still up
         {
-            printf("[-] Unable to send handshake.\n");
+            printf("[-] Unable to initialize handshake.\n");
             exit(1);
         }
-        
-        char opcode;
-        opcode = OP_ONLINE; // set the operation code to O which sets the protocol
+        char opcode = OP_ONLINE; // set the operation code to O which sets the protocol
         if(recv(socketdesc, (char *)&opcode, sizeof(opcode), 0) == 0) // recv will return 0 if the socket is disconnected
         {
-            printf(" Server has stopped running.\nExiting ...\n");
+            printf(" Server have stopped running.\nExiting ...\n");
             exit(1);
         }
-        
-        printf("FTP_client:~$ "); // displays the prompt to the user
-        
+
+        printf("FTP-client:$ "); // displays the prompt to the user
+
         // reads the user input and tokenize
-        
+
         if(fgets(buf, MAX_CMD_INPUT, stdin) == NULL)
         {
             if(!feof(stdin))
             {
-                perror("[-] Could not read from stdin");
+                perror("[-] Unable to read from stdin");
                 exit(1);
             }
         }
         // searches for new line in the code
         delim = strchr(buf, '\n');
-        
+
         if(delim == NULL) // check if there is no '\n' in the buffer
         {
             buf[MAX_CMD_INPUT-1] = '\0';
@@ -213,91 +224,99 @@ int main(int argc , char * argv[]){
         {
             *delim = '\0'; // replace '\n' with '\0'
         }
-        
-        int num_of_args = parser(buf, tokens);
-        
-        if(num_of_args == 0) // if the client just click enter without typing any commands, display the prompt again
+
+        int argsCount = parser(buf, tokens);
+
+        if(argsCount == 0) // if the client just click enter without typing any commands, display the prompt again
         {
             continue;
         }
         
+        
         if(strcmp(tokens[0],CMD_PUT) == 0)
         {
-            if(num_of_args == 2) // ensures the number of arguments is 2
-            putCommand(socketdesc, tokens[1]);
+            if(argsCount  == 2) // ensures the number of arguments is 2
+            {
+                command* cmd = allocCommand(socketdesc, tokens[1]);
+                putCommand(cmd);
+                freeCommand(cmd);
+            }
             else
-            printf(" Usage: put <filename>\n");
-            
+            printf("Example Usage: put <filename>\n");
+
         }
         else if(strcmp(tokens[0],CMD_GET) == 0)
         {
-            if(num_of_args == 2) // ensures number of arguments is 2
-            getCommand(socketdesc, tokens[1]);
+            if(argsCount == 2) {
+                command* cmd = allocCommand(socketdesc, tokens[1]);
+                getCommand(cmd);
+                freeCommand(cmd);
+            }
             else
-            printf(" Usage: get <filename>\n");
-            
+            printf("Example Usage: get <filename>\n");
+
         }
         else if(strcmp(tokens[0],CMD_PWD) ==0)
         {
-            if(num_of_args == 1)// ensures number of argument is 1 for pwd
-            pwdCommand(socketdesc);
-            else
-            printf(" Usage: pwd\n");
+           argsCount == 1 ? pwdCommand(socketdesc) : printf(" Example Usage: pwd\n");
+
         }
         else if(strcmp(tokens[0],CMD_LPWD)==0)
         {
-            if(num_of_args == 1)// ensurs number of argument is 1 for lpwd
-            lpwdCommand();
-            else
-            printf(" Usage: lpwd\n");
+           argsCount == 1 ?  lpwdCommand() : printf(" Example Usage: lpwd\n");
         }
         else if(strcmp(tokens[0],CMD_DIR)==0)
         {
-            if(num_of_args == 1)
-            dirCommand(socketdesc);
-            else
-            printf(" Usage: dir\n"); // dir is to display current working directory's files, you cannot specify any path
+           argsCount == 1 ? dirCommand(socketdesc) :  printf("Example Usage: dir\n"); // dir is to display current working directory's files, you cannot specify any path
         }
         else if(strcmp(tokens[0],CMD_LDIR)==0)
         {
-            if(num_of_args == 1)
-            ldirCommand();
-            else
-            printf(" Usage: ldir\n"); // ldir is to display local current working directory's files, you cannot specify
-        }                                            // any path
+            argsCount == 1 ? ldirCommand() : printf("Example Usage: ldir\n"); // ldir is to display local current working directory's files, you cannot specify
+        }
         else if(strcmp(tokens[0],CMD_CD)==0)
         {
-            if(num_of_args == 2)
-            cdCommand(socketdesc, tokens[1]);
+            if(argsCount  == 2)
+            {
+                command* cmd = allocCommand(socketdesc, tokens[1]);
+                cdCommand(cmd);
+                freeCommand(cmd);
+            }
             else
-            printf(" Usage: cd <directory_pathname>\n");
+            printf("Example Usage: : cd <directory_pathname>\n");
         }
         else if(strcmp(tokens[0],CMD_LCD)==0)
         {
-            if(num_of_args == 2)
+            if(argsCount == 2)
             lcdCommand(tokens[1]);
             else
-            printf("Usage: lcd <directory_pathname>\n");
+            printf("Example Usage: : lcd <directory_pathname>\n");
         }
         else if(strcmp(tokens[0],CMD_HELP)==0)
         {
-            if(num_of_args == 1)
-            helpCommand();
-            else
-            printf(" Usage: help\n");
+           argsCount == 1 ?  helpCommand():  printf("Example Usage: : help\n");
         }
         else if(strcmp(tokens[0],CMD_QUIT)==0)
         {
-            if(num_of_args == 1)
-            {
-                quitCommand();
-            }
-            else
-            printf(" Usage: quit\n");
+           argsCount == 1 ?  quitCommand(): printf("Example Usage: quit\n");
         }
         else// if none of above is true display default message
         {
             printf(" No such command is available. Please type 'help' to see list of available commands.\n");
         }
     }
+
+    return 0;
 }
+
+/**
+ * Creates The Interrupt signal for the program
+ */
+void createInterruptSignal(){
+    struct sigaction interrupt; // initialze sigaction
+    interrupt.sa_flags = 0;
+    interrupt.sa_handler = quitCommand; // set the handler to capture signals
+    sigfillset(&(interrupt.sa_mask)); // block all other signals
+    CHECK_SIGNAL(SIGINT, &interrupt);
+    CHECK_SIGNAL(SIGQUIT, &interrupt);
+}
+

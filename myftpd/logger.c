@@ -7,37 +7,54 @@
 #include <fcntl.h>  // for opening files
 #include <unistd.h> // for closing files
 
+
+
+void getLocalTime(char * timeFormat){
+    time_t seconds; // used to store seconds since 1970 utc time
+    struct tm * timevalue;// used to convert raw time from time function to local current time
+    time(&seconds); // stores the time into seconds variable since 1970 utc time
+    timevalue = localtime(&seconds); // gets the local time from passing in time_t seconds
+    asctime_r(timevalue,timeFormat); // converts local time to a string value
+    
+}
+
 // outputs current time , client id and passed format string to the log file
 
 void logger(descriptors *d, char* argformat, ...) {
 
 int fileDescriptor; // stores the value of file descriptor when opening the file
 
-if((fileDescriptor = open(d->logfile,O_WRONLY | O_APPEND | O_CREAT, 0777)) == -1){//check if filedescriptor returns > 1 to show it opens successfully
+if((fileDescriptor = open(d->logfile,O_WRONLY | O_APPEND | O_CREAT, 0766)) == -1){
     perror("[-] Failed writting to log \n");
     exit(0);
 }
-    va_list arguments; // used to store additional arguments for the function
-    time_t seconds; // used to store seconds since 1970 utc time
-    struct tm * timevalue;// used to convert raw time from time function to local current time
-    char timeFormat[64];// stores the current time value in string format
+    va_list arguments;
+
+
     char * loggerFormat; // used to store relevant data in string format 
     char * cidformat = "Client %d - "; // used for outputing clientid details later
-    char cidstring[64] = ""; // used to store the client id output later
+    char cidstring[64] = " "; // used to store the client id output later
     
-    time(&seconds); // stores the time into seconds variable since 1970 utc time
-    timevalue = localtime(&seconds); // gets the local time from passing in time_t seconds
-    asctime_r(timevalue,timeFormat); // converts local time to a string value
+    
+    char timeFormat[64];// stores the current time value in string format
+    getLocalTime(timeFormat); // gets the local time
+    
+    
+    
     
     if(d->cid != 0){
         sprintf(cidstring,cidformat,d->cid);// stores the output of client id into the buffer
     }
+    
+    
     // create a log of dynamic size data of the stringlength of the timeformat and argumentformat + 2 bytes * size of char
     loggerFormat = (char*) malloc((strlen(timeFormat) + strlen(cidstring) + strlen(argformat) + 2) * sizeof(char));
-    
+
     
     // copies the timeFormat string to the loggerformat pointer of strings
     strcpy(loggerFormat,timeFormat);
+
+
     strcat(loggerFormat,cidstring); // appends cidstring to the loggerformat string
     strcat(loggerFormat,argformat);// appends argformat to loggerformat string
     strcat(loggerFormat,"\n"); // appends the new line to the loggerformat

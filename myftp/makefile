@@ -1,7 +1,7 @@
 #makefile for client
 
-myftp: myftp.o stream.o parse.o command.o
-	gcc -Wall myftp.o stream.o parse.o command.o -o myftp
+myftp: myftp.c stream.o parse.o command.o
+	gcc -Wall myftp.c stream.o parse.o command.o -o myftp
 command.o: command.c command.h
 	gcc -c -Wall command.c -o command.o
 stream.o: stream.c stream.h
