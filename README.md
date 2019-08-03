@@ -1,5 +1,5 @@
-# Project Title
-A FTP Client and Server Program Done In C programming includes list of commands 
+# FTP Client and Server Program 
+FTP client server program that has the following list of commands 
 
 PWD - print working directory
 cd - change directory
